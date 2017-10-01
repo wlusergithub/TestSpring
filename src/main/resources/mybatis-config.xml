@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--加载连接数据库的基本信息文件-->
+    <properties resource="jdbc.properties"></properties>
+
+    <settings>
+        <!--打开延迟加载的开关  -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--将积极加载改为消极加载及按需加载  -->
+        <setting name="aggressiveLazyLoading" value="false" />
+        <!--开启二级缓存-->
+        <setting name="cacheEnabled" value="true"></setting>
+    </settings>
+
+
+    <!--类型的别名为java类型设置一个别名-->
+    <typeAliases>
+        <!--<typeAlias alias="Usernames" type="com.unjlams.mybatis.table.Username"/>-->
+        <package name="com.unjlams.mybatis.table"></package>
+    </typeAliases>
+    
+
+    <!--插件-->
+    <plugins>
+        <plugin interceptor="com.unjlams.Interceptor.MybatisIntercetor">
+            <!-- 注册初始化参数, 包装成Properties-->
+            <property name="" value=""></property>
+        </plugin>
+    </plugins>
+
+
+
+    <!--连接数据库-->
+    <!--
+        environments: 多种环境，Mybatis可以配置多种环境，default指定使用某种环境，可以达到快速切换环境
+            environment: 配置一个具体的环境信息，必须有两个标签； id代表当前环境的唯一标识
+            transactionManager(事务管理):
+                        type: JDBC 和 Managed
+                        自定义: 事务管理器实现TransactionFactory接口.type指定为全类名
+            datasource(数据源):
+                        type: UNPOOLED(不使用连接池) 、POOLED(使用连接池) 、JNDI(不需要管数据库驱动等变化，直接定义容器来解决)
+                        自定义: 实现DataSourceFactory接口.type全类名
+
+    -->
+    <environments default="development">
+        <environment id="development">
+            <!--JDBC方式连接-->
+            <transactionManager type="JDBC"/>
+            <!--数据连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}" />
+                <property name="url" value="${url}" />
+                <property name="username" value="${username}" />
+                <property name="password" value="${password}" />
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <!--
+        databaseIdProvider: 数据库厂商标识
+        type="" ; VendorDatabaseProvider:
+        作用就是得到数据库厂商的标识(驱动getDatebaseProductName()),mybatis就能根据数据库厂商标识来执行不同的sql
+        Mysql 、 Oracle 、 SQL Server 等
+
+    -->
+    <databaseIdProvider type="DB_VENDOR">
+        <!--为不同的数据库厂商起别名-->
+        <property name="MySQL" value="mysql"></property>
+        <property name="Oracle" value="oracle"></property>
+        <property name="SQL Server" value="sqlserver"></property>
+    </databaseIdProvider>
+
+
+    <!--将写好的Mybatis SQL映射文件，一定要注册到全局配置文件中-->
+    <mappers>
+        <!--
+            mapper :
+                注册一个sql映射文件
+                注册配置文件
+                resource : 引用类路径下的sql映射文件
+                    mybatismapper/UserMapper.xml
+                url : 引用网络路径过磁盘路径下的sql映射文件
+                    file:///H:/mapper/xxx.xml
+
+             class :
+                引用(注册)接口
+                1、有sql映射文件，映射文件名必须个接口同名，并且放在与接口同一目录下
+                2、没有sql映射文件，所有的sql都是利用注解写接口上
+                public interface UsernameMapper {
+                    @Select("select * from User where id = #{id}")
+                    public Username getUserById(Integer id);
+                }
+
+            推荐：
+                比较重要的，复杂的Dao接口写SQL映射文件
+                不重要，简单的Dao接口为了开发快速可以使用注解
+
+        -->
+        <mapper resource="mybatismapper/UserMapper.xml"/>
+        <mapper resource="mybatismapper/UsernameMapper.xml" />
+        <mapper resource="mybatisMapper/DyanmicSQL.xml" />
+        <!--<mapper class="com.unjlams.mybatis.inter.UsernameMapper"></mapper>-->
+        <!-- 批量注册 -->
+        <!--<package name=""></package>-->
+    </mappers>
+</configuration>

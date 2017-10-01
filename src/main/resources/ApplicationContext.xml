@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+
+    <!-- 导入类到相关的容器bean中-->
+    <!--
+        Bean标签: 使用该元素描述需要Spring容器管理对象
+        class:　被管理对象的完整类名
+        name: 给被管理的对象起个名字,获取对象时根据该名称获得对象
+                可以重复, 可以使用特殊字符
+        id: 与name属性一摸一样,
+                 名称不可重复, 不能使用特殊字符
+        scope:　
+               singleton(默认值): 单例对象, 被标识为单例的对象在spring容器中只会存在一个实例
+               prototype: 对例原型, 被标识为多例的对象, 每次在获得时才会创建, 每次创建都是新的对象
+               request: web环境下, 对象与request生命周期一致
+               session: web环境下, 对象与session对象一样
+    -->
+    <!--1. 空参数创建对象-->
+    <!--<bean name="firstSpringUser" class="com.unjlams.SpringObject.SpringUser"-->
+          <!--init-method="init" destroy-method="destory">-->
+        <!--<property name="name" value="Hello world"></property>-->
+    <!--</bean>-->
+
+
+    <!--2. 静态工厂方式创建
+        调用SpringStaticfac, 静态方法创建SpringUser对象
+    -->
+    <!--<bean name="firstSpringStaticfac" class="com.unjlams.SpringObject.SpringStaticfac" factory-method="createFac"></bean>-->
+
+    <!--3. 创建实例工厂
+        调用SpringStaticfac, 非静态方法createShiLiFac, 创建SpringUser对象
+    -->
+    <!--<bean name="shilifac" class="com.unjlams.SpringObject.SpringStaticfac"></bean>-->
+    <!--<bean name="firstSpringshilifac" factory-bean="shilifac" factory-method="createShiLiFac"></bean>-->
+
+
+    <!--<import resource="ApplicationContext.xml"></import>-->
+
+
+    <!--
+        依赖注入:　
+            1. set注入
+    -->
+    <bean name="firstSpringUser" class="com.unjlams.SpringObject.SpringUser">
+        <property name="name" value="unjlams"></property>
+        <property name="age" value="19"></property>
+        <!--引用类型注入: 为car属性注入下方配置的car对象-->
+        <property name="car" ref="cars"></property>
+    </bean>
+    <bean name="cars" class="com.unjlams.SpringObject.SpringCar">
+        <property name="name" value="奔驰"></property>
+        <property name="color" value="红色"></property>
+    </bean>
+
+
+    <!--
+        2. 构造函数注入
+            type: 构造函数参数类型
+            index: 构造函数参数的索引
+    -->
+    <bean name="secondSpringUser" class="com.unjlams.SpringObject.SpringUser">
+        <constructor-arg name="name" value="11" type="java.lang.Integer" index="0"></constructor-arg>
+        <constructor-arg name="car" ref="cars" ></constructor-arg>
+    </bean>
+
+
+    <!--
+        3. p名称空间注入 beans中需要加入(xmlns:p="http://www.springframework.org/schema/p")
+        使用p注入:
+             值类型: p:属性名
+             对象类型: p:属性名-ref
+    -->
+    <bean name="threeSpringUser" class="com.unjlams.SpringObject.SpringUser"
+            p:name="uns" p:age="99" p:car-ref="cars"
+    ></bean>
+
+
+    <!--
+        4. spel (Spring Expression Language) Spring注入
+        value: #{注入过的值bean的name.属性名}
+    -->
+    <bean name="fourSpringUser" class="com.unjlams.SpringObject.SpringUser">
+        <property name="name" value="#{firstSpringUser.name}"></property>
+        <property name="age" value="#{firstSpringUser.age}" ></property>
+        <property name="car" ref="cars" ></property>
+     </bean>
+
+
+
+    <!--集合类型注入-->
+    <bean name="fivesetSpring" class="com.unjlams.SpringObject.SetSpring">
+        <!--数组类型注入-->
+        <property name="arrays">
+            <array>
+                <value>unjlams1</value>
+                <value>unjlam2</value>
+                <!--对象-->
+                <ref bean="firstSpringUser"></ref>
+            </array>
+        </property>
+
+        <!--list类型注入, 类似set类型注入-->
+        <property name="list">
+            <list>
+                <value>unjs1</value>
+                <value>unjs2</value>
+                <!--对象-->
+                <ref bean="firstSpringUser"></ref>
+            </list>
+        </property>
+
+        <!--map类型注入-->
+        <property name="map">
+            <map>
+                <entry key="1" value="unj1"></entry>
+                <!--键为字符串, 值为对象-->
+                <entry key="springuser" value-ref="firstSpringUser"></entry>
+                <!--键为对象, 值为对象-->
+                <entry key-ref="cars" value-ref="firstSpringUser"></entry>
+            </map>
+        </property>
+
+        <!--properties类型注入-->
+        <property name="properties">
+            <props>
+                <prop key="root">root</prop>
+                <prop key="password">password</prop>
+            </props>
+        </property>
+    </bean>
+
+
+
+    <!--包的扫描器-->
+    <context:component-scan base-package="com.unjlams.SpringTest"></context:component-scan>
+
+
+
+    <!--Aop相关的配置-->
+    <!-- 配置目标对象 -->
+    <bean name="firstAopImpl" class="com.unjlams.SpringAop.firstAopImpl"></bean>
+    <!-- 配置通知对象-->
+    <bean name="firstPrepareNotify" class="com.unjlams.SpringAop.PrepareNotify"></bean>
+
+    <!--注解配置-->
+    <!--<aop:aspectj-autoproxy />-->
+
+    <!--Aop 通知配置-->
+    <aop:config>
+        <!--
+               配置切入点:
+                       // 配置类中的一个方法
+                       public void com.unjlams.SpringAop.firstAopImpl.first()
+                       void com.unjlams.SpringAop.firstAopImpl.first()
+                       * com.unjlams.SpringAop.firstAopImpl.first()
+                       // 配置类中的全部无参数方法
+                       * com.unjlams.SpringAop.firstAopImpl.*()
+                       // 配置省略类中的所有有参方法
+                       * com.unjlams.SpringAop.*AopImpl.*(..)
+                       // 配置类中的子包又有有参方法
+                       * com.unjlams.SpringAop..*AopImpl.*(..)
+        -->
+        <!-- 配置需要切入的类下的函数-->
+        <aop:pointcut id="firstAop" expression="execution(* com.unjlams.SpringAop.firstAopImpl.*(..))"></aop:pointcut>
+        <!--配置通知类-->
+        <aop:aspect ref="firstPrepareNotify">
+            <!--指定before方法为前置通知-->
+            <aop:before method="before" pointcut-ref="firstAop"></aop:before>
+            <!--指定afterReturning方法为后置通知, 出现异常不调用-->
+            <aop:after-returning method="afterReturning" pointcut-ref="firstAop"></aop:after-returning>
+            <!--指定after方法为后置通知, 不论够否出现异常都会调用-->
+            <aop:after method="after" pointcut-ref="firstAop"></aop:after>
+            <!--指定环绕around绕通知-->
+            <aop:around method="around" pointcut-ref="firstAop"></aop:around>
+            <!--指定异常通知-->
+            <aop:after-throwing method="afterException" pointcut-ref="firstAop"></aop:after-throwing>
+        </aop:aspect>
+    </aop:config>
+
+
+
+    <!-- Spring JDBC框架 dbcp2数据源 -->
+    <!--设置配置文件位置-->
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"  destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+
+        <!-- 连接初始值，连接池启动时创建的连接数量的初始值  默认值是0 -->
+        <property name="initialSize" value="3" />
+        <!-- 最小空闲值.当空闲的连接数少于阀值时，连接池就会预申请去一些连接，以免洪峰来时来不及申请  默认值是0 -->
+        <property name="minIdle" value="3" />
+        <!-- 最大空闲值.当经过一个高峰时间后，连接池可以慢慢将已经用不到的连接慢慢释放一部分，一直减少到maxIdle为止 ，0时无限制  默认值是8 -->
+        <property name="maxIdle" value="5" />
+        <!-- 连接池的最大值，同一时间可以从池分配的最多连接数量，0时无限制   默认值是8 -->
+        <property name="maxTotal" value="15" />
+    </bean>
+
+    <!--配置JDBCTemplate, 并注入一个dataSource数据源-->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!--单独配置特定的sql语句-->
+    <!--<bean id="user" class="package">-->
+        <!--<property name="jt" ref="jdbcTemplate" ></property>-->
+    <!--</bean>-->
+
+
+
+
+    <!--Spring 事务管理-->
+
+    <!--1. 配置数据源-->
+    <!--2. 配置JdbcTemplate-->
+    <!--3. 注入dao-->
+    <bean id="firstTransationImple" class="com.unjlams.SpringAop.FirstTransationImple">
+        <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+    </bean>
+
+    <!-- 4.注入事务-->
+    <bean id="transationServices" class="com.unjlams.SpringAop.TransationServices">
+        <property name="ts" ref="firstTransationImple"></property>
+        <property name="tt" ref="transactionTemplate"></property>
+    </bean>
+
+    <!--Spring 事务的核心管理器,封装了所有的事务操作 -->
+    <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 编程式 ,  事务模板对象-->
+    <bean name="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"></property>
+    </bean>
+
+
+
+    <!--声明式 : 事务通知-->
+    <!--<tx:advice id="transactionAdvice" transaction-manager="transactionManager">-->
+        <!--<tx:attributes>-->
+            <!--&lt;!&ndash;-->
+                <!--isolation: 隔离级别-->
+                <!--propagation: 传播行为-->
+                <!--read-onlyL: 是否只读-->
+            <!--&ndash;&gt;-->
+            <!--&lt;!&ndash;同时配置多个方法&ndash;&gt;-->
+            <!--&lt;!&ndash;<tx:method name="update*" isolation="REPEATABLE_READ" propagation="REQUIRED" read-only="false"></tx:method>&ndash;&gt;-->
+            <!--<tx:method name="services" isolation="REPEATABLE_READ" propagation="REQUIRED" read-only="false"/>-->
+        <!--</tx:attributes>-->
+    <!--</tx:advice>-->
+
+    <!--&lt;!&ndash;配置织入&ndash;&gt;-->
+    <!--<aop:config>-->
+        <!--&lt;!&ndash;配置切点表达式&ndash;&gt;-->
+        <!--<aop:pointcut id="aopsecond" expression="execution(* com.unjlams.SpringAop.TransationServices.*(..))"></aop:pointcut>-->
+        <!--&lt;!&ndash;配置切面&ndash;&gt;-->
+        <!--<aop:advisor pointcut-ref="aopsecond" advice-ref="transactionAdvice"></aop:advisor>-->
+    <!--</aop:config>-->
+
+
+    <!--声明式 开启aop 注解管理事务-->
+    <tx:annotation-driven/>
+
+
+
+
+
+
+</beans>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unjlams.mybatis.inter.Username2Mapper">
+
+
+    <!--
+        eviction: 缓存的回收策略
+            * LRU : 最近最少使用的, 移除最长时间不被使用的对象
+            * FIFO : 先进先出, 按对象进入缓存的顺序来移除它们
+            * SOFT :　软引用, 移除基于垃圾回收器状态和软引用规则的对象
+            * WEAK : 弱引用, 更积极地移除基于垃圾收集器状态和弱引用规则对象
+            * 默认的是LRU
+        flushInterval: 缓存刷新间隔
+            缓存多长时间清空一次, 默认不清空, 设置一个毫秒值
+        readOnly : 是否只读
+            true : 只读,mybatis认为所有从缓存中获取数据的操作都是只读操作,不会修改数据
+                    mybatis 为了加快获取速度, 直接就会将数据在缓存中的引用交给用户, 不安全, 速度快
+            false :非只读, mybatis觉得获取数据可能会被修改
+                    mybatis会利用序列化和反序列化技术克隆一份新的数据给你, 安全, 速度慢
+        size :　缓存存放多少元素
+        type : 指定自定义缓存的全类名, 实现Cache接口即可
+    -->
+    <cache eviction="FIFO" flushInterval="60000" readOnly="false" size="1024">
+    </cache>
+
+
+
+
+    <!--自定义某个javabean的封装规则
+            type : 自定义规则的Java类型
+            id : 唯一id方法
+        -->
+    <resultMap id="MyUsername" type="com.unjlams.mybatis.table.Username">
+        <!--指定主键列封装规则
+            colum:指定哪一列
+            prepert: 指定对应的JavaBean属性
+        -->
+        <id column="id" property="id"></id>
+
+        <!--定义普通列封装规则
+            其他不指定的列会自动封装，只要写了resultMap就吧全部的映射规则都写上去
+        -->
+        <result column="name" property="name"></result>
+        <result column="sex" property="sex"></result>
+        <result column="age" property="age"></result>
+    </resultMap>
+
+    <!--resultMap : 自定义结果集映射规则 -->
+    <!--<select id="selectUsername" resultMap="MyUsername">-->
+        <!--SELECT  * from User where id = #{id}-->
+    <!--</select>-->
+
+
+
+
+    <!--多表查询 条件查询-->
+    <!--<select id="selectUsername" resultMap="UsernaemMany" >-->
+        <!--select u.id , u.name , u.sex , u.age , d.dept_name-->
+            <!--from User as u , department as d where u.dept_id=d.id and u.id=#{id}-->
+    <!--</select>-->
+
+    <resultMap id="UsernaemMany" type="com.unjlams.mybatis.table.Username">
+        <id column="id" property="id"></id>
+
+        <!-- column 为实际数据库表的列名,  property为传入JavaBean列名-->
+        <!--<result column="id"  property="id"></result>-->
+        <result column="name"  property="name"></result>
+        <result column="sex"  property="sex"></result>
+        <result column="age"  property="age"></result>
+        <!--<result column="id"  property="dept.id"></result>-->
+        <!--<result column="dept_name"  property="dept.deptname"></result>-->
+
+        <!-- 可以指定联合的javaBean对象
+            property = "dept" : 指定的属性对象
+            javaType :指定对象的类型
+        -->
+        <association property="dept" javaType="com.unjlams.mybatis.table.Department">
+            <id column="id" property="id"></id>
+            <result column="dept_name" property="deptname"></result>
+        </association>
+    </resultMap>
+
+
+
+
+    <!--左外连接查询 一对一查询-->
+    <select id="leftAssociat"  resultMap="leftAss">
+          select u.id , u.name , u.sex , u.age ,d.dept_name
+          from user u left JOIN department d
+          on u.dept_id = d.id
+          where d.dept_name="技术部";
+    </select>
+
+    <resultMap id="leftAss" type="com.unjlams.mybatis.table.Username">
+        <id column="id" property="id"></id>
+        <result column="name"  property="name"></result>
+        <result column="sex"  property="sex"></result>
+        <result column="age"  property="age"></result>
+        <association property="dept" javaType="com.unjlams.mybatis.table.Department">
+            <id column="id" property="id"></id>
+            <result column="dept_name" property="deptname"></result>
+        </association>
+    </resultMap>
+
+
+
+
+
+    <!--分步查询-->
+    <select id="selectUsername" resultMap="fenbuSelect">
+        select * from User where id = #{id};
+    </select>
+
+    <select id="selectDepartment" resultMap="deptmap">
+        select * from department where id = #{id}
+    </select>
+
+    <resultMap id="deptmap" type="com.unjlams.mybatis.table.Department">
+        <id column="id" property="id"></id>
+        <result column="dept_name" property="deptname"></result>
+    </resultMap>
+
+    <resultMap id="fenbuSelect" type="com.unjlams.mybatis.table.Username">
+        <id column="id" property="id"></id>
+        <result column="name"  property="name"></result>
+        <result column="sex"  property="sex"></result>
+        <result column="age"  property="age"></result>
+        <result column="dept_id" property="deptid"></result>
+        <!--将查到的结果dept_id 赋值给 department 的 id 值
+            column : 数据表中的dept_id
+            select : 表示要查询的语句
+            fetchType : 延迟加载 lazy 延迟
+        -->
+        <association property="dept" column="dept_id" select="selectDepartment"></association>
+    </resultMap>
+
+
+
+    <!--一对多查询 (一个部门多个人)-->
+    <select id="rightAssociat" resultMap="yiVSduo">
+        select u.id , u.name , u.sex , u.age ,d.dept_name ,u.dept_id
+        from department d  left JOIN user u
+        on u.dept_id = d.id
+        where d.id = 1;
+    </select>
+
+    <resultMap id="yiVSduo" type="com.unjlams.mybatis.table.Department">
+        <id column="id" property="id"></id>
+        <result column="dept_name" property="deptname"></result>
+        <collection property="username" javaType="com.unjlams.mybatis.table.Username">
+            <id column="id" property="id"></id>
+            <result column="name"  property="name"></result>
+            <result column="sex"  property="sex"></result>
+            <result column="age"  property="age"></result>
+            <result column="dept_id" property="deptid"></result>
+        </collection>
+    </resultMap>
+
+</mapper>

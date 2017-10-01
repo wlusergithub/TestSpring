@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unjlams.mybatis.inter.Username2Mapper">
+
+
+
+    <select id="testIf" resultType="com.unjlams.mybatis.table.Username">
+        select * from User
+        <where>
+            <choose>
+                <when test="id !=null">
+                     id = #{id} and
+                </when>
+                <when test="name !=null">
+                    name = #{name} and
+                </when>
+                <otherwise>
+                    1=1
+                </otherwise>
+            </choose>
+
+                <!--<if test="id !=null">-->
+                     <!--id = #{id} and-->
+                <!--</if>-->
+                <!--<if test="name !=null">-->
+                     <!--name = #{name} and-->
+                <!--</if>-->
+        </where>
+    </select>
+
+
+    <!--
+        collection :
+       1. 如果传入的是单参数且参数类型是一个List的时候，collection属性值为list
+       2. 如果传入的是单参数且参数类型是一个array数组的时候，collection的属性值为array
+       3. 如果传入的参数是多个的时候，我们就需要把它们封装成一个Map了，当然单参数也可以封装成map，实际上如果你在传入参数的时候，
+       在breast里面也是会把它封装成一个Map的，map的key就是参数名，所以这个时候collection属性值就是传入的List或array对象在自己封装的map里面的key
+
+       item : 当前遍历元素赋值给指定的变量
+       separator : 每个元素的分隔符
+       open : 遍历拼接的开始字符
+       close : 遍历所有结果后拼接的一个结束符
+       index : 索引
+    -->
+    <select id="testForeach" resultType="com.unjlams.mybatis.table.Username">
+        SELECT * from User where id in
+        <foreach collection="list" item="item_id" separator="," open="(" close=")" >
+            #{item_id}
+        </foreach>
+    </select>
+
+
+
+    <!--
+            缓存机制
+    -->
+    <!--<select id="selectUsername" resultType="com.unjlams.mybatis.table.Username">-->
+        <!--SELECT  * from User where id = #{id}-->
+    <!--</select>-->
+
+
+
+</mapper>

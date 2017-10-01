@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--test-->
+<!--<mapper namespace="com.unjlams.mybatis.table.UsernameMapper">-->
+    <!--&lt;!&ndash;-->
+        <!--namespace:名称空间-->
+        <!--id:唯一标识符-->
+        <!--resultType:返回值类型-->
+        <!--#{id} == ？: 传入的参数-->
+    <!--&ndash;&gt;-->
+    <!--<select id="selectuser" resultType="com.unjlams.mybatis.table.Username">-->
+        <!--select * from User where id = #{id}-->
+    <!--</select>-->
+<!--</mapper>-->
+
+<!--test1-->
+<mapper namespace="com.unjlams.mybatis.inter.UsernameMapper">
+    <!--
+        namespace:名称空间 ; 指定为接口的全类名
+        id:唯一标识符 ; 方法名
+        resultType:返回值类型
+        #{id} == ？: 传入的参数
+    -->
+    <select id="selectuser" resultType="com.unjlams.mybatis.table.Username" databaseId="mysql">
+        select * from User where id = #{id}
+    </select>
+
+    <select id="getUserById" resultType="users">
+        select * from User where id = #{id}
+    </select>
+
+     <!-- 添加 -->
+    <!--
+        mysql 支持自增主键，自增主键的获取
+        useGeneratedKeys="true"
+        keyProperty="id"
+        此属性只适用于insert 、 update
+    -->
+    <insert id="addUsername" parameterType="com.unjlams.mybatis.table.Username"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT into User(name, sex , age)
+        VALUES(#{name} , #{sex} , #{age})
+    </insert>
+
+    <!-- 修改数据-->
+    <update id="updateUsername">
+        UPDATE User
+        set name=#{name} , sex = #{sex} , age = #{age}
+        where id = #{id}
+    </update>
+
+    <!--删除数据-->
+    <delete id="deleteUsername">
+        DELETE from User where id = #{id}
+    </delete>
+
+    <!--查询多条数据-->
+    <select id="getManyUsernmae" resultType="com.unjlams.mybatis.table.Username">
+        select * from User where name LIKE #{name}
+    </select>
+
+
+
+</mapper>
